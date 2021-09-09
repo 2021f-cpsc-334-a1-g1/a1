@@ -33,23 +33,33 @@ else:
     logl = "quiet"
 
 # Script log levels
-severities = ["INF", "WRN", "ERR"]
+severities = ["INF", "INF", "WRN", "ERR"]
 def log(message: str, severity: str) -> None:
     log_time = ""
     if args.verbose == True:
         log_time = f"{time.time():.8f} "
 
-    if severity == 0 and args.verbose == True and args.quiet == False:
-        print(f"{log_time}\x1b[0;37;40m{severities[severity]}: {message}\033[0;0m")
+    if severity == 0 and args.quiet == False and args.verbose == True:
+        print(f"{log_time}\x1b[0;36;40m{severities[severity]}: {message}\033[0;0m")
     elif severity == 1 and args.quiet == False:
-        print(f"{log_time}\x1b[0;33;40m{severities[severity]}: {message}\033[0;0m")
+        print(f"{log_time}\x1b[0;37;40m{severities[severity]}: {message}\033[0;0m")
     elif severity == 2 and args.quiet == False:
+        print(f"{log_time}\x1b[0;33;40m{severities[severity]}: {message}\033[0;0m")
+    elif severity == 3 and args.quiet == False:
         print(f"{log_time}\x1b[0;31;40m{severities[severity]}: {message}\033[0;0m")
         exit(1)
 
+# Sanity checks for in_video and out_video
+if not os.path.isfile(args.in_video):
+    log("in_video is invalid.", 3)
+if os.path.isfile(args.out_video):
+    log("out_video already exists.", 3)
+
 # Open screen config generated in previous script
+log("Loading JSON screen config...", 0)
 with open(args.screen_config_json, "r") as read_file:
     config = json.load(read_file)
+    log("JSON screen config loaded.", 1)
 
     # Probe in_video
     probe = ffmpeg.probe(args.in_video)
@@ -63,9 +73,9 @@ with open(args.screen_config_json, "r") as read_file:
 
     # Multiple video streams unsupported
     if len(video_stream_indicies) > 1:
-        log("More than one video stream detected.\nSpatial audio may be encoded to video tracks.", 2)
+        log("More than one video stream detected.\nSpatial audio may be encoded to video tracks.", 3)
     elif len(video_stream_indicies) < 1:
-        log("No video streams detected.", 2)
+        log("No video streams detected.", 3)
 
     # Find in_video resolution
     in_video_width = probe["streams"][video_stream_indicies[0]]["width"]
@@ -78,16 +88,17 @@ with open(args.screen_config_json, "r") as read_file:
     for screen in config["screens"]:
         total_width += screen["size"]["x"]
         # TODO: Height, total_height += screen["size"]["y"]
-    log(f"Output resolution: {total_width}x{total_height}", 0)
+    log(f"Output resolution: {total_width}x{total_height}", 1)
 
     # If not preprocessed to output resolution, preprocess
     if in_video_width != total_width or in_video_height != total_height:
+        log("Preprocessing...", 1)
         upscale = ffmpeg.input(args.in_video).filter("scale", width=total_width, height=total_height).filter("setsar", "1", "1").output("part-x.mp4", crf=args.crf, preset=args.preset, loglevel=logl).run()
 
     # Create crops based on screen config, collect as inputs for concat step
     hstack = []
     for idx,screen in enumerate(config["screens"]):
-        log(f"Processing screen: {json.dumps(screen)}", 0)
+        log(f"Processing screen ({idx + 1}/{len(config['screens'])}): {json.dumps(screen)}", 1)
         out = ffmpeg.input("part-x.mp4").filter('crop', f"{screen['size']['x']}", f"{screen['size']['y']}", f"{screen['origin']['x']}", f"{screen['origin']['y']}").output(f"part-{idx}.mp4", loglevel=logl).run()
         hstack.append(ffmpeg.input(f"part-{idx}.mp4"))
 
