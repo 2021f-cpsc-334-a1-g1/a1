@@ -1,9 +1,19 @@
 
-
 int screenHeight = 768;
 int screenWidth = 8160;
 
-int vertexLineLength = 15;
+color red = color(255, 0, 0);
+color orange = color(255, 127, 0);
+color yellow = color(255, 255, 0);
+color green = color(0, 255, 0);
+color blue = color(0, 0, 255);
+color indigo = color(46, 43, 95);
+color violet = color(139, 0, 255);
+
+color [] rainbow = {red, orange, yellow, green, blue, indigo, violet};
+int colorCount = 7;
+
+int vertexLineLength = 100;
 
 boolean topLeft = true;
 int topLeftX = 0;
@@ -20,13 +30,9 @@ int screenCount = 0;
 JSONArray screenArray = null;
 JSONObject screenCoords = null;
 
-void settings() {
-  smooth();
-}
-
 void setup() {
-  surface.setSize(screenWidth, screenHeight);
-  surface.setLocation(1024, 0);
+  fullScreen(0);
+  println(height);
   
   // Create JSON array to hold coordinates for each screen
   screenArray = new JSONArray();
@@ -37,15 +43,15 @@ void setup() {
 }
 
 
-void draw() {
+void draw() { //<>//
   background(255);
-  strokeWeight(5.0);
+  strokeWeight(20.0);
   strokeJoin(MITER);
   if (!waitUserInput) {
-  if (topLeft) {
+    if (topLeft) {
       // Top left corner icon
       noFill();
-      stroke(255, 0, 0);
+      stroke(0, 0, 0);
       beginShape();
       vertex(mouseX, mouseY - vertexLineLength);
       vertex(mouseX, mouseY);
@@ -54,14 +60,14 @@ void draw() {
     } else {
       // Bottom right corner icon
       noFill();
-      stroke(255, 0, 0);
-      strokeWeight(10.0);
+      stroke(0, 0, 0);
+      strokeWeight(40.0);
       beginShape();  
       vertex(mouseX - vertexLineLength, mouseY);
       vertex(mouseX, mouseY);
       vertex(mouseX, mouseY + vertexLineLength);
       endShape();
-      fill(0, 0, 255);
+      fill(rainbow[screenCount % colorCount]);
       stroke(0,0,0);
       strokeWeight(0.0);
       rect(topLeftX, topLeftY, mouseX - topLeftX, mouseY - topLeftY);
@@ -77,14 +83,14 @@ void draw() {
     int currBottomRightY = currScreenCoords.getInt("bottom_right_y");
     
     // Drawing the final rectangle layout on the screens
-    fill(0, 0, 255);
+    fill(rainbow[i % colorCount]);
     strokeWeight(0.0);
     rect(currTopLeftX, currTopLeftY, currBottomRightX - currTopLeftX, currBottomRightY - currTopLeftY);
     
     // Number Label for the screens
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
-    textSize(((currBottomRightX - currTopLeftX) / 2));
+    textSize(abs((currBottomRightX - currTopLeftX) / 2));
     pushMatrix();
     translate(currTopLeftX + ((currBottomRightX - currTopLeftX) / 2.5), currTopLeftY + ((currBottomRightY - currTopLeftY)) / 2);
     rotate(radians(-90));
@@ -157,9 +163,3 @@ void keyTyped() {
   }
     
 }
-
-
-//void keyPressed() {
-//  saveJSONArray(screenArray, "screen_coords.json");
-//  exit();
-//}
