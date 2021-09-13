@@ -26,7 +26,7 @@ boolean waitUserInput = false;
 
 int screenCount = 0;
 
-// Objects to store screen coordinates
+// Objects to store display coordinates
 JSONArray screenArray = null;
 JSONObject screenCoords = null;
 
@@ -34,12 +34,12 @@ void setup() {
   fullScreen(0);
   println(height);
   
-  // Create JSON array to hold coordinates for each screen
+  // Create JSON array to hold coordinates for each display
   screenArray = new JSONArray();
-  println("Welcome to the Projector Alignment System!\nStarting from the far left screen and moving right, please click on the top left corner of the projector screen, followed by the bottom right corner.");
+  println("Welcome to the Display Alignment System!\nStarting from the far left display and moving right, please click on the top left corner of the display, followed by the bottom right corner.");
   println("At the end of alignment, the numbers should read in ascending order from left to right across the screens");
-  println("When you are done plotting the projector coordinates, press [s] to save your work to the screen_coords.json file");
-  println("\nPlease start by clicking the top left corner of Screen " + screenCount);
+  println("When you are done plotting the display coordinates, press [s] to save your work to the display_config.json file");
+  println("\nPlease start by clicking the top left corner of Display " + screenCount);
 }
 
 
@@ -74,7 +74,7 @@ void draw() { //<>//
     }
   }
   
-  // Drawing the rectangles on the screen after they've been created
+  // Drawing the rectangles on the display after they've been created
   for (int i = 0; i < screenArray.size(); i++){
     JSONObject currScreenCoords = screenArray.getJSONObject(i);
     int currTopLeftX = currScreenCoords.getInt("top_left_x");
@@ -82,12 +82,12 @@ void draw() { //<>//
     int currBottomRightX = currScreenCoords.getInt("bottom_right_x");
     int currBottomRightY = currScreenCoords.getInt("bottom_right_y");
     
-    // Drawing the final rectangle layout on the screens
+    // Drawing the final rectangle layout on the displays
     fill(rainbow[i % colorCount]);
     strokeWeight(0.0);
     rect(currTopLeftX, currTopLeftY, currBottomRightX - currTopLeftX, currBottomRightY - currTopLeftY);
     
-    // Number Label for the screens
+    // Number Label for the displays
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
     textSize(abs((currBottomRightX - currTopLeftX) / 2));
@@ -113,7 +113,7 @@ void mousePressed() {
       screenCoords.setInt("top_left_x", topLeftX);
       screenCoords.setInt("top_left_y", topLeftY);
       
-      println("Press the bottom right corner of Screen " + screenCount);
+      println("Press the bottom right corner of Display " + screenCount);
       topLeft = false;
     }
     else {
@@ -123,21 +123,21 @@ void mousePressed() {
       
       screenCoords.setInt("bottom_right_x", bottomRightX);
       screenCoords.setInt("bottom_right_y", bottomRightY);
-      // Append screen coordinates to array of all screens
+      // Append displays coordinates to array of all displays
       screenArray.append(screenCoords);
-      // Reset coordinates for next screen
+      // Reset coordinates for next display
       screenCoords = null;
       
       screenCount++;
           
       topLeft = true;
       
-      println("\nWould you like to proceed to tracing the next screen? [y/n]\nRemember, if you are done plotting, press [s] \n(If not, you will be prompted to redraw the most recent rectangle. You cannot make edits to this rectangle after this point).\n");
+      println("\nWould you like to proceed to tracing the next displays? [y/n]\nRemember, if you are done plotting, press [s] \n(If not, you will be prompted to redraw the most recent rectangle. You cannot make edits to this rectangle after this point).\n");
       waitUserInput = true;
   
     }
   } else {
-    println("Press [y/n] to indicate if you would like to continue to the next screen or redraw the current screen mapping");
+    println("Press [y/n] to indicate if you would like to continue to the next display or redraw the current display mapping");
   }
 }
 
@@ -152,13 +152,13 @@ void keyTyped() {
     screenCount--;
     screenArray.remove(screenCount);
     waitUserInput = false;
-    println("\nPress the top left corner of Screen " + screenCount);
+    println("\nPress the top left corner of Display " + screenCount);
 
   } else if (key == 'y') {
     waitUserInput = false;
-    println("\nPress the top left corner of Screen " + screenCount);
+    println("\nPress the top left corner of Display " + screenCount);
   } else if (key == 's') {
-    saveJSONArray(screenArray, "screen_coords.json");
+    saveJSONArray(screenArray, "./reports/display_config.json");
     exit();
   }
     

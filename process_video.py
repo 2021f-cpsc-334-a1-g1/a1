@@ -12,7 +12,7 @@ import ffmpeg
 
 # Argument parsing
 parser = argparse.ArgumentParser(usage="Convert videos to fit collected data.\n")
-parser.add_argument("screen_config_json", help="collected screen data")
+parser.add_argument("display_config_json", help="collected screen data")
 parser.add_argument("in_video", help="path of video to parse")
 parser.add_argument("out_video", help="path of video to output")
 parser.add_argument("--crf", help="crf for intermediate encoding (default: 30)", default=30, type=int)
@@ -59,7 +59,7 @@ else:
 
 # Open screen config generated in previous script
 log("Loading JSON screen config...", 0)
-with open(args.screen_config_json, "r") as read_file:
+with open(args.display_config_json, "r") as read_file:
     config = json.load(read_file)
     log("JSON screen config loaded.", 1)
 
