@@ -81,8 +81,13 @@ The above numbers are taken directly from user input (mouse clicking) so are sli
 
 ## Use Case: Video Processing Module
 
-TODO: @Cody include in description
+After screen resolution, rotation, order, and origin data is collected, `process_video.py` can be used to reformat a video to these specifications. This module fully utilizes the flexibility of the data collected by the Processing module to accomplish a dynamic system for adapting content to complex display setups. **Warning**: this currently requires 3 encodes, therefore a low CRF and a slow preset should be specified to maintain video quality. Usage instructions can be reached using the help flag `-h` as in `process_video.py -h`.
 
-- Explanation of how the Processing script output can be used to translate videos to be properly displayed across the projectors
-- Identify various libraries used
-- Talk about program being dynamic and not only specific to this projector set up
+Many options are available for the `process_video.py` script including, encode crf, encode preset, display padding, forced rotation, crop-based or stretch-based aspect ratio compensation, splitting into multiple videos for each display, and debugging flags for not encoding and log verbosity.
+
+As utilized, the Python package [ffmpeg-python](https://github.com/kkroening/ffmpeg-python) provides bindings on the ffmpeg binary developed by Fabrice Bellard and the FFmpeg Community, as licensed under the [GNU Lesser General Public License (LGPL) version 2.1](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
+
+### Process Video Demo in Leeds:
+
+<placeholder>
+
