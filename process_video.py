@@ -10,6 +10,10 @@ import argparse
 # FFmpeg binary bindings
 import ffmpeg
 
+from pathlib import Path
+ffprobe_loc = Path("./bin/ffmpeg/ffprobe.exe")
+ffmpeg_loc = Path("./bin/ffmpeg/ffmpeg.exe")
+
 # Argument parsing
 parser = argparse.ArgumentParser(usage="Convert videos to fit collected data.\n")
 parser.add_argument("display_config_json", help="collected screen data")
@@ -64,7 +68,8 @@ with open(args.display_config_json, "r") as read_file:
     log("JSON screen config loaded.", 1)
 
     # Probe in_video
-    probe = ffmpeg.probe(args.in_video)
+    print(args.in_video)
+    probe = ffmpeg.probe(args.in_video, cmd=ffprobe_loc)
 
     # Look for applicable in_video streams
     video_stream_indicies = []
@@ -96,7 +101,7 @@ with open(args.display_config_json, "r") as read_file:
     if in_video_width != total_width or in_video_height != total_height:
         log("Preprocessing...", 1)
         if not args.noaction:
-            upscale = ffmpeg.input(args.in_video).filter("scale", width=total_width, height=total_height).filter("setsar", "1", "1").output("part-x.mp4", crf=args.crf, preset=args.preset, loglevel=logl).run()
+            upscale = ffmpeg.input(args.in_video).filter("scale", width=total_width, height=total_height).filter("setsar", "1", "1").output("part-x.mp4", crf=args.crf, preset=args.preset, loglevel=logl).run(cmd="./bin/ffmpeg/ffmpeg.exe")
 
     # Create crops based on screen config, collect as inputs for concat step
     hstack = []
@@ -113,7 +118,7 @@ with open(args.display_config_json, "r") as read_file:
                 out = out.filter("transpose", 2).filter("transpose", 2)
             elif args.rotate == 270:
                 out = out.filter("transpose", 2)
-            out.output(f"part-{idx}.mp4", loglevel=logl).run()
+            out.output(f"part-{idx}.mp4", loglevel=logl).run(cmd="./bin/ffmpeg/ffmpeg.exe")
 
             hstack.append(ffmpeg.input(f"part-{idx}.mp4"))
 
@@ -122,7 +127,7 @@ with open(args.display_config_json, "r") as read_file:
     if not args.split:
         log(f"Merging {len(config['screens'])} screens...", 1)
         if not args.noaction:
-            out = ffmpeg.filter(hstack, "hstack", "6").output(args.out_video, crf=args.crf, preset=args.preset, loglevel=logl).run()
+            out = ffmpeg.filter(hstack, "hstack", "6").output(args.out_video, crf=args.crf, preset=args.preset, loglevel=logl).run(cmd="./bin/ffmpeg/ffmpeg.exe")
 
         # Clean up individual crops
         if not args.noaction:
