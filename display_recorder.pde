@@ -1,9 +1,19 @@
 
-
 int screenHeight = 768;
 int screenWidth = 8160;
 
-int vertexLineLength = 15;
+color red = color(255, 0, 0);
+color orange = color(255, 127, 0);
+color yellow = color(255, 255, 0);
+color green = color(0, 255, 0);
+color blue = color(0, 0, 255);
+color indigo = color(46, 43, 95);
+color violet = color(139, 0, 255);
+
+color [] rainbow = {red, orange, yellow, green, blue, indigo, violet};
+int colorCount = 7;
+
+int vertexLineLength = 100;
 
 boolean topLeft = true;
 int topLeftX = 0;
@@ -16,36 +26,32 @@ boolean waitUserInput = false;
 
 int screenCount = 0;
 
-// Objects to store screen coordinates
+// Objects to store display coordinates
 JSONArray screenArray = null;
 JSONObject screenCoords = null;
 
-void settings() {
-  smooth();
-}
-
 void setup() {
-  surface.setSize(screenWidth, screenHeight);
-  surface.setLocation(1024, 0);
+  fullScreen(0);
+  println(height);
   
-  // Create JSON array to hold coordinates for each screen
+  // Create JSON array to hold coordinates for each display
   screenArray = new JSONArray();
-  println("Welcome to the Projector Alignment System!\nStarting from the far left screen and moving right, please click on the top left corner of the projector screen, followed by the bottom right corner.");
+  println("Welcome to the Display Alignment System!\nStarting from the far left display and moving right, please click on the top left corner of the display, followed by the bottom right corner.");
   println("At the end of alignment, the numbers should read in ascending order from left to right across the screens");
-  println("When you are done plotting the projector coordinates, press [s] to save your work to the screen_coords.json file");
-  println("\nPlease start by clicking the top left corner of Screen " + screenCount);
+  println("When you are done plotting the display coordinates, press [s] to save your work to the display_config.json file");
+  println("\nPlease start by clicking the top left corner of Display " + screenCount);
 }
 
 
-void draw() {
+void draw() { //<>//
   background(255);
-  strokeWeight(5.0);
+  strokeWeight(20.0);
   strokeJoin(MITER);
   if (!waitUserInput) {
-  if (topLeft) {
+    if (topLeft) {
       // Top left corner icon
       noFill();
-      stroke(255, 0, 0);
+      stroke(0, 0, 0);
       beginShape();
       vertex(mouseX, mouseY - vertexLineLength);
       vertex(mouseX, mouseY);
@@ -54,21 +60,21 @@ void draw() {
     } else {
       // Bottom right corner icon
       noFill();
-      stroke(255, 0, 0);
-      strokeWeight(10.0);
+      stroke(0, 0, 0);
+      strokeWeight(40.0);
       beginShape();  
       vertex(mouseX - vertexLineLength, mouseY);
       vertex(mouseX, mouseY);
       vertex(mouseX, mouseY + vertexLineLength);
       endShape();
-      fill(0, 0, 255);
+      fill(rainbow[screenCount % colorCount]);
       stroke(0,0,0);
       strokeWeight(0.0);
       rect(topLeftX, topLeftY, mouseX - topLeftX, mouseY - topLeftY);
     }
   }
   
-  // Drawing the rectangles on the screen after they've been created
+  // Drawing the rectangles on the display after they've been created
   for (int i = 0; i < screenArray.size(); i++){
     JSONObject currScreenCoords = screenArray.getJSONObject(i);
     int currTopLeftX = currScreenCoords.getInt("top_left_x");
@@ -76,15 +82,15 @@ void draw() {
     int currBottomRightX = currScreenCoords.getInt("bottom_right_x");
     int currBottomRightY = currScreenCoords.getInt("bottom_right_y");
     
-    // Drawing the final rectangle layout on the screens
-    fill(0, 0, 255);
+    // Drawing the final rectangle layout on the displays
+    fill(rainbow[i % colorCount]);
     strokeWeight(0.0);
     rect(currTopLeftX, currTopLeftY, currBottomRightX - currTopLeftX, currBottomRightY - currTopLeftY);
     
-    // Number Label for the screens
+    // Number Label for the displays
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
-    textSize(((currBottomRightX - currTopLeftX) / 2));
+    textSize(abs((currBottomRightX - currTopLeftX) / 2));
     pushMatrix();
     translate(currTopLeftX + ((currBottomRightX - currTopLeftX) / 2.5), currTopLeftY + ((currBottomRightY - currTopLeftY)) / 2);
     rotate(radians(-90));
@@ -107,7 +113,7 @@ void mousePressed() {
       screenCoords.setInt("top_left_x", topLeftX);
       screenCoords.setInt("top_left_y", topLeftY);
       
-      println("Press the bottom right corner of Screen " + screenCount);
+      println("Press the bottom right corner of Display " + screenCount);
       topLeft = false;
     }
     else {
@@ -117,21 +123,21 @@ void mousePressed() {
       
       screenCoords.setInt("bottom_right_x", bottomRightX);
       screenCoords.setInt("bottom_right_y", bottomRightY);
-      // Append screen coordinates to array of all screens
+      // Append displays coordinates to array of all displays
       screenArray.append(screenCoords);
-      // Reset coordinates for next screen
+      // Reset coordinates for next display
       screenCoords = null;
       
       screenCount++;
           
       topLeft = true;
       
-      println("\nWould you like to proceed to tracing the next screen? [y/n]\nRemember, if you are done plotting, press [s] \n(If not, you will be prompted to redraw the most recent rectangle. You cannot make edits to this rectangle after this point).\n");
+      println("\nWould you like to proceed to tracing the next displays? [y/n]\nRemember, if you are done plotting, press [s] \n(If not, you will be prompted to redraw the most recent rectangle. You cannot make edits to this rectangle after this point).\n");
       waitUserInput = true;
   
     }
   } else {
-    println("Press [y/n] to indicate if you would like to continue to the next screen or redraw the current screen mapping");
+    println("Press [y/n] to indicate if you would like to continue to the next display or redraw the current display mapping");
   }
 }
 
@@ -146,20 +152,14 @@ void keyTyped() {
     screenCount--;
     screenArray.remove(screenCount);
     waitUserInput = false;
-    println("\nPress the top left corner of Screen " + screenCount);
+    println("\nPress the top left corner of Display " + screenCount);
 
   } else if (key == 'y') {
     waitUserInput = false;
-    println("\nPress the top left corner of Screen " + screenCount);
+    println("\nPress the top left corner of Display " + screenCount);
   } else if (key == 's') {
-    saveJSONArray(screenArray, "screen_coords.json");
+    saveJSONArray(screenArray, "./reports/display_config.json");
     exit();
   }
     
 }
-
-
-//void keyPressed() {
-//  saveJSONArray(screenArray, "screen_coords.json");
-//  exit();
-//}
